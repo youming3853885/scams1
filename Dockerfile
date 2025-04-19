@@ -17,7 +17,7 @@ RUN apt-get update \
 COPY package*.json ./
 
 # 安裝依賴
-RUN npm ci
+RUN npm install
 
 # 複製所有檔案
 COPY . .
