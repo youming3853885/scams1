@@ -53,13 +53,24 @@
 - 確認`Dockerfile`配置正確
 - 確認所有必需的環境變量都已設置
 
-### 2. 應用啟動但無法工作
+### 2. npm ci相關錯誤
+
+如果您看到類似以下錯誤：
+```
+npm 錯誤 `npm ci`只有當您的package.json和package-lock.json或npm-shrinkwrap.json同步時才能安裝套件
+```
+
+這表示package.json和package-lock.json不同步。解決方法：
+- 在Dockerfile中將`RUN npm ci`改為`RUN npm install`
+- 提交修改並重新部署
+
+### 3. 應用啟動但無法工作
 
 - 檢查是否已正確設置`OPENAI_API_KEY`環境變量
 - 確認Render服務計劃是否有足夠的資源運行Puppeteer
 - 檢查是否有網絡連接問題
 
-### 3. Puppeteer相關錯誤
+### 4. Puppeteer相關錯誤
 
 如果看到與Puppeteer或Chrome相關的錯誤，請確保：
 - `Dockerfile`中包含所有必需的Chrome依賴
