@@ -1,0 +1,25 @@
+# 依賴目錄
+node_modules/
+
+# 環境變量文件
+.env
+
+# 日誌文件
+*.log
+
+# 編輯器目錄
+.vscode/
+.cursor/
+
+# 操作系統文件
+.DS_Store
+Thumbs.db
+
+# 壓縮文件
+*.zip
+*.gz
+*.tar
+
+# 編譯輸出
+/dist
+/build 

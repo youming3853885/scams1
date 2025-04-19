@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: website-scam-detector
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
+    autoDeploy: true 
