@@ -29,6 +29,40 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// 檢查URL是否是應用程式連結
+function checkIfAppLink(url) {
+  // 應用程式URL scheme列表
+  const appSchemes = [
+    'line://', 'whatsapp://', 'fb-messenger://', 'tg://', 'wechat://', 
+    'viber://', 'snapchat://', 'instagram://', 'twitter://', 'linkedin://'
+  ];
+  
+  // 應用程式相關域名
+  const appDomains = [
+    'line.me', 'whatsapp.com', 'messenger.com', 'facebook.com', 'telegram.org', 
+    'wechat.com', 'viber.com', 'snapchat.com', 'instagram.com', 'twitter.com', 
+    'linkedin.com', 'bit.ly', 'tinyurl.com', 'goo.gl', 'rebrand.ly'
+  ];
+  
+  // 檢查URL是否含有應用程式URL scheme
+  const hasAppScheme = appSchemes.some(scheme => url.toLowerCase().includes(scheme));
+  
+  // 檢查URL是否含有應用程式相關域名
+  const hasAppDomain = appDomains.some(domain => {
+    try {
+      return new URL(url).hostname.toLowerCase().includes(domain);
+    } catch (e) {
+      return false;
+    }
+  });
+  
+  return {
+    isAppLink: hasAppScheme || hasAppDomain,
+    appScheme: hasAppScheme,
+    appDomain: hasAppDomain ? (new URL(url).hostname || null) : null
+  };
+}
+
 // 掃描網站 API 端點
 app.post('/api/scan', async (req, res) => {
   try {
@@ -37,11 +71,14 @@ app.post('/api/scan', async (req, res) => {
       return res.status(400).json({ error: '請提供有效的網址' });
     }
 
+    // 檢查URL是否是應用程式連結
+    const appLinkInfo = checkIfAppLink(url);
+    
     // 1. 獲取網站截圖和內容
     const { screenshot, content, metadata } = await getWebsiteData(url);
     
-    // 2. 分析網站詐騙風險
-    const analysis = await analyzeFraudRisk(url, content, metadata);
+    // 2. 分析網站詐騙風險（傳入應用程式連結信息）
+    const analysis = await analyzeFraudRisk(url, content, metadata, appLinkInfo);
     
     // 3. 獲取截圖上需要標記的區域
     const markers = await identifySuspiciousAreas(screenshot, content, analysis);
@@ -52,6 +89,7 @@ app.post('/api/scan', async (req, res) => {
       screenshot: `data:image/jpeg;base64,${screenshot}`,
       analysis,
       markers,
+      appLinkInfo,
       scanTime: new Date().toISOString()
     };
     
@@ -163,56 +201,81 @@ async function getWebsiteData(url) {
 }
 
 // 分析網站詐騙風險
-async function analyzeFraudRisk(url, content, metadata) {
+async function analyzeFraudRisk(url, content, metadata, appLinkInfo) {
   try {
+    // 構建系統提示，加入應用程式連結相關信息
+    let systemPrompt = `你是一個專門分析網站詐騙風險的AI助手。你需要識別各種詐騙指標，包括但不限於：
+      1. 誘導性或急迫性語言
+      2. 虛假承諾或不合理優惠
+      3. 要求提供敏感個人資訊
+      4. 陌生或可疑的付款方式
+      5. 缺乏聯繫資訊或合法身份驗證
+      6. 使用知名品牌的假冒頁面
+      7. 安全缺陷如缺少HTTPS
+      8. 拼寫或語法錯誤`;
+    
+    // 如果是應用程式連結，加入特殊指南
+    if (appLinkInfo && appLinkInfo.isAppLink) {
+      systemPrompt += `\n\n特別注意，這是一個可能連結到外部應用程式的網頁（${appLinkInfo.appDomain || '未知應用'}）。這類網頁常見詐騙特徵：
+      1. 假冒官方應用連結頁面
+      2. 要求通過應用程式掃描QR碼
+      3. 要求安裝未知來源的應用程式
+      4. 使用短網址服務隱藏真實目的地
+      5. 承諾通過應用程式提供優惠或獎勵
+      6. 使用應用程式進行付款但缺乏安全保證
+      7. 要求分享個人資訊到通訊軟體中`;
+    }
+    
+    systemPrompt += `\n\n分析結果需要包含：
+      1. 風險分數(0-100)
+      2. 詐騙風險類型分類
+      3. 存在的具體危險指標
+      4. 安全建議`;
+
+    // 構建用戶提示，加入應用程式連結相關信息
+    let userPrompt = `請分析以下網站的詐騙風險：
+      URL: ${url}
+      
+      網站標題: ${metadata.title}
+      網站描述: ${metadata.description || '無'}`;
+    
+    // 如果是應用程式連結，加入特殊信息
+    if (appLinkInfo && appLinkInfo.isAppLink) {
+      userPrompt += `\n\n注意：這個URL被識別為可能連結到外部應用程式 (${appLinkInfo.appDomain || '未知來源'})。
+      請特別關注可能的釣魚企圖、假冒官方應用頁面等詐騙風險。`;
+    }
+    
+    userPrompt += `\n\n網站內容摘要:
+      ${content.bodyText.substring(0, 3000)}
+      
+      表單數量: ${content.forms.length}
+      表單輸入欄位: ${JSON.stringify(content.forms.map(f => f.inputs.map(i => i.type)).flat())}
+      
+      外部鏈接數量: ${content.links.filter(l => l.isExternal).length}
+      按鈕文本: ${JSON.stringify(content.buttons)}
+      警告/彈窗內容: ${JSON.stringify(content.alerts)}
+      
+      請提供詳細分析，包含風險分數(0-100)，詳細理由，安全建議，以及JSON格式的總結結果。
+      回覆請使用以下JSON格式:
+      {
+        "riskScore": 數字,
+        "riskLevel": "低風險"/"中風險"/"高風險",
+        "fraudTypes": ["詐騙類型1", "詐騙類型2"],
+        "indicators": ["具體指標1", "具體指標2"],
+        "safetyAdvice": ["建議1", "建議2"]
+      }`;
+
     // 使用 OpenAI 進行詐騙風險分析
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `你是一個專門分析網站詐騙風險的AI助手。你需要識別各種詐騙指標，包括但不限於：
-          1. 誘導性或急迫性語言
-          2. 虛假承諾或不合理優惠
-          3. 要求提供敏感個人資訊
-          4. 陌生或可疑的付款方式
-          5. 缺乏聯繫資訊或合法身份驗證
-          6. 使用知名品牌的假冒頁面
-          7. 安全缺陷如缺少HTTPS
-          8. 拼寫或語法錯誤
-          分析結果需要包含：
-          1. 風險分數(0-100)
-          2. 詐騙風險類型分類
-          3. 存在的具體危險指標
-          4. 安全建議`
+          content: systemPrompt
         },
         {
           role: "user",
-          content: `請分析以下網站的詐騙風險：
-          URL: ${url}
-          
-          網站標題: ${metadata.title}
-          網站描述: ${metadata.description || '無'}
-          
-          網站內容摘要:
-          ${content.bodyText.substring(0, 3000)}
-          
-          表單數量: ${content.forms.length}
-          表單輸入欄位: ${JSON.stringify(content.forms.map(f => f.inputs.map(i => i.type)).flat())}
-          
-          外部鏈接數量: ${content.links.filter(l => l.isExternal).length}
-          按鈕文本: ${JSON.stringify(content.buttons)}
-          警告/彈窗內容: ${JSON.stringify(content.alerts)}
-          
-          請提供詳細分析，包含風險分數(0-100)，詳細理由，安全建議，以及JSON格式的總結結果。
-          回覆請使用以下JSON格式:
-          {
-            "riskScore": 數字,
-            "riskLevel": "低風險"/"中風險"/"高風險",
-            "fraudTypes": ["詐騙類型1", "詐騙類型2"],
-            "indicators": ["具體指標1", "具體指標2"],
-            "safetyAdvice": ["建議1", "建議2"]
-          }`
+          content: userPrompt
         }
       ],
       temperature: 0.7,
@@ -227,7 +290,9 @@ async function analyzeFraudRisk(url, content, metadata) {
       riskLevel: analysisResult.riskLevel || '無法判斷',
       fraudTypes: analysisResult.fraudTypes || [],
       indicators: analysisResult.indicators || [],
-      safetyAdvice: analysisResult.safetyAdvice || []
+      safetyAdvice: analysisResult.safetyAdvice || [],
+      isAppLink: appLinkInfo && appLinkInfo.isAppLink,
+      appLinkInfo: appLinkInfo
     };
   } catch (error) {
     console.error('分析詐騙風險時出錯:', error);
@@ -253,7 +318,9 @@ async function analyzeFraudRisk(url, content, metadata) {
         '搜索網站的評價和評論',
         'API配額不足，建議日後重新檢測'
       ],
-      isSimulatedData: true // 增加標記，表示這是模擬數據
+      isSimulatedData: true, // 增加標記，表示這是模擬數據
+      isAppLink: appLinkInfo && appLinkInfo.isAppLink,
+      appLinkInfo: appLinkInfo
     };
   }
 }
@@ -278,6 +345,13 @@ async function identifySuspiciousAreas(screenshot, content, analysis) {
     
     // 使用 OpenAI 視覺分析來標記可疑區域
     const indicators = analysis.indicators.join(", ");
+    
+    // 增加對應用程式連結的特殊提示
+    let appLinkPrompt = '';
+    if (analysis.isAppLink) {
+      appLinkPrompt = `這是一個與應用程式相關的網頁，特別注意標記可能與應用程式下載、QR碼掃描、應用程式認證相關的可疑區域。`;
+    }
+    
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -290,6 +364,7 @@ async function identifySuspiciousAreas(screenshot, content, analysis) {
           3. 超高折扣或不合理優惠
           4. 假冒的品牌標誌或認證
           5. 可疑的聯繫方式
+          ${appLinkPrompt}
           對於每個應該標記的區域，提供以下資訊：
           1. 區域在螢幕上的相對位置（以百分比表示）
           2. 標記寬度和高度（以百分比表示）

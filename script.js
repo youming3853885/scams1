@@ -139,6 +139,9 @@ function displayAnalysisResults(result) {
     const formattedTime = `${scanDate.getFullYear()}-${padZero(scanDate.getMonth() + 1)}-${padZero(scanDate.getDate())} ${padZero(scanDate.getHours())}:${padZero(scanDate.getMinutes())}`;
     document.getElementById('scan-time').textContent = formattedTime;
     
+    // 清除之前可能存在的所有警告橫幅
+    document.querySelectorAll('.api-warning, .app-warning-banner').forEach(el => el.remove());
+    
     // 檢查是否為模擬數據
     if (result.analysis.isSimulatedData) {
         // 添加API配額不足的提示
@@ -152,6 +155,28 @@ function displayAnalysisResults(result) {
         // 添加到結果容器的頂部
         const resultsContainer = document.querySelector('.results-container');
         resultsContainer.insertBefore(warningBanner, resultsContainer.firstChild);
+    }
+    
+    // 檢查是否為應用程式連結
+    if (result.appLinkInfo && result.appLinkInfo.isAppLink) {
+        // 添加應用程式風險警告
+        const appWarningEl = document.createElement('div');
+        appWarningEl.className = 'app-warning-banner';
+        appWarningEl.innerHTML = `
+            <div class="warning-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="warning-text">
+                <strong>應用程式連結警告！</strong> 
+                <p>此網站可能連結到外部應用程式 (${result.appLinkInfo.appDomain || '未知應用'})。請格外警惕可能的詐騙風險。</p>
+            </div>
+        `;
+        
+        // 添加到結果容器的頂部
+        const resultsContainer = document.querySelector('.results-container');
+        if (document.querySelector('.api-warning')) {
+            resultsContainer.insertBefore(appWarningEl, document.querySelector('.api-warning').nextSibling);
+        } else {
+            resultsContainer.insertBefore(appWarningEl, resultsContainer.firstChild);
+        }
     }
     
     // 設置風險分數
@@ -236,6 +261,16 @@ function updateDetailedAnalysis(analysis) {
         { name: '內容分析', icon: 'fa-comment-alt', level: analysis.riskScore > 40 ? 'high-risk' : 'medium-risk', description: '評估網站內容中的詐騙指標。' }
     ];
     
+    // 如果是應用程式相關網站，添加特定風險類別
+    if (analysis.isAppLink) {
+        riskCategories.push({ 
+            name: '應用程式安全', 
+            icon: 'fa-mobile-alt', 
+            level: analysis.riskScore > 50 ? 'high-risk' : 'medium-risk', 
+            description: '評估與應用程式相關的特定風險。' 
+        });
+    }
+    
     // 生成風險類別卡片
     riskCategories.forEach((category, index) => {
         const detailCard = document.createElement('div');
@@ -249,22 +284,65 @@ function updateDetailedAnalysis(analysis) {
                 <div class="meter-fill" style="width: ${fillWidth}%"></div>
                 <span>${category.level === 'high-risk' ? '高風險' : (category.level === 'medium-risk' ? '中風險' : '低風險')}</span>
             </div>
-            <p>${analysis.indicators[index] || category.description}</p>
+            <p class="category-description">${category.description}</p>
         `;
         
         detailsContent.appendChild(detailCard);
     });
     
-    // 更新安全建議
-    const tipsList = document.querySelector('.tips-section ul');
-    tipsList.innerHTML = ''; // 清空現有內容
+    // 安全建議部分
+    const securityAdvice = document.createElement('div');
+    securityAdvice.id = 'security-advice';
+    securityAdvice.className = 'security-advice';
+    securityAdvice.innerHTML = `<h3>安全建議</h3>`;
     
-    // 添加安全建議
+    const adviceList = document.createElement('ul');
     analysis.safetyAdvice.forEach(advice => {
-        const li = document.createElement('li');
-        li.textContent = advice;
-        tipsList.appendChild(li);
+        const adviceItem = document.createElement('li');
+        adviceItem.textContent = advice;
+        adviceList.appendChild(adviceItem);
     });
+    
+    securityAdvice.appendChild(adviceList);
+    detailsContent.appendChild(securityAdvice);
+    
+    // 如果是應用程式相關，添加應用程式特定安全建議
+    if (analysis.isAppLink) {
+        // 添加應用程式特定的安全建議
+        const appSecurityTips = [
+            '不要安裝來源不明的應用程式',
+            '檢查應用程式是否從官方應用商店下載',
+            '謹慎掃描QR碼或點擊直接打開應用程式的連結',
+            '避免在應用程式中輸入敏感個人資訊',
+            '不要在應用程式中進行未經驗證的支付操作'
+        ];
+        
+        const appTipsEl = document.createElement('div');
+        appTipsEl.className = 'app-security-tips';
+        appTipsEl.innerHTML = `
+            <h3>應用程式安全提示</h3>
+            <ul>
+                ${appSecurityTips.map(tip => `<li>${tip}</li>`).join('')}
+            </ul>
+        `;
+        
+        document.querySelector('#security-advice').appendChild(appTipsEl);
+    }
+    
+    // 詐騙指標列表
+    const indicatorSection = document.createElement('div');
+    indicatorSection.className = 'fraud-indicators';
+    indicatorSection.innerHTML = `<h3>詐騙指標</h3>`;
+    
+    const indicatorList = document.createElement('ul');
+    analysis.indicators.forEach(indicator => {
+        const indicatorItem = document.createElement('li');
+        indicatorItem.textContent = indicator;
+        indicatorList.appendChild(indicatorItem);
+    });
+    
+    indicatorSection.appendChild(indicatorList);
+    detailsContent.appendChild(indicatorSection);
 }
 
 // 補零函數（用於日期格式化）

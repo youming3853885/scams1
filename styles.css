@@ -568,22 +568,104 @@ button:hover {
     }
 }
 
-/* API配額不足警告樣式 */
+/* API警告橫幅 */
 .api-warning {
-    background-color: rgba(243, 156, 18, 0.1);
-    border-left: 4px solid var(--warning-color);
-    color: #7f5308;
-    padding: 12px 15px;
+    background-color: #fff3cd;
+    border-left: 5px solid #ffc107;
+    padding: 15px;
     margin-bottom: 20px;
-    border-radius: var(--border-radius);
+    border-radius: 5px;
     display: flex;
     align-items: center;
-    gap: 10px;
 }
 
 .api-warning i {
-    color: var(--warning-color);
-    font-size: 1.2rem;
+    font-size: 24px;
+    color: #ff9800;
+    margin-right: 15px;
+}
+
+/* 應用程式警告橫幅 */
+.app-warning-banner {
+    display: flex;
+    align-items: center;
+    background-color: #ffe8d9;
+    border-left: 5px solid #ff7043;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.app-warning-banner .warning-icon {
+    font-size: 24px;
+    color: #ff5722;
+    margin-right: 15px;
+}
+
+.app-warning-banner .warning-text strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.app-security-tips {
+    background-color: #e8f4fd;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.app-security-tips h3 {
+    color: #0277bd;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.app-security-tips ul {
+    padding-left: 20px;
+}
+
+.app-security-tips li {
+    margin-bottom: 5px;
+}
+
+/* 安全建議和詐騙指標部分 */
+.security-advice, 
+.fraud-indicators {
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.security-advice h3, 
+.fraud-indicators h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.security-advice ul, 
+.fraud-indicators ul {
+    padding-left: 20px;
+}
+
+.security-advice li, 
+.fraud-indicators li {
+    margin-bottom: 8px;
+}
+
+/* 詳細卡片描述 */
+.category-description {
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
 }
 
 /* 增加截圖滾動條的樣式 */
