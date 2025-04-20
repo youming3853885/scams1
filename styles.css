@@ -529,16 +529,25 @@ button:hover {
 
 /* 頁腳樣式 */
 .footer {
-    text-align: center;
-    color: #666;
     margin-top: auto;
-    padding-top: 30px;
-    border-top: 1px solid #eee;
-    font-size: 0.9rem;
+    padding: 20px;
+    background-color: var(--dark-color);
+    color: #fff;
+    text-align: center;
+    border-top: 3px solid var(--accent-color);
 }
 
 .footer p {
-    margin-bottom: 5px;
+    margin: 5px 0;
+}
+
+/* 作者標示樣式 */
+.creator-credit {
+    margin-top: 15px;
+    font-weight: bold;
+    color: var(--accent-color);
+    font-size: 16px;
+    letter-spacing: 1px;
 }
 
 /* 響應式調整 */
