@@ -76,6 +76,18 @@ npm 錯誤 `npm ci`只有當您的package.json和package-lock.json或npm-shrinkw
 - `Dockerfile`中包含所有必需的Chrome依賴
 - 在`server.js`中正確配置了Puppeteer啟動選項
 
+### 5. Puppeteer版本棄用警告
+
+如果您在部署日誌中看到類似以下警告：
+```
+npm 警告 棄用 puppeteer@21.11.0 ： < 22.8.2 不再受支持
+```
+
+這表示您使用的Puppeteer版本已被棄用。解決方法：
+- 在`package.json`中更新Puppeteer版本到`"puppeteer": "^22.8.2"`或更高版本
+- 提交更改並重新部署
+- 注意：如果更新Puppeteer版本後遇到兼容性問題，可能需要相應地更新Puppeteer相關代碼
+
 ## 更新應用
 
 當您更新代碼並推送到倉庫時，Render會自動重新部署應用（如果在服務設置中啟用了自動部署）。 
