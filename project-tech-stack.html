@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網站詐騙檢測工具 - 技術架構</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tech-table-container {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin: 20px 0;
+        }
+        
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .tech-table th, .tech-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tech-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .tech-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .tech-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .tech-category {
+            font-weight: 600;
+        }
+        
+        .tech-icon {
+            margin-right: 8px;
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .back-home {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="page active">
+            <div class="tech-table-container">
+                <h1><i class="fas fa-cogs"></i> 網站詐騙檢測工具 - 技術架構</h1>
+                <button class="back-home" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i> 返回首頁
+                </button>
+                
+                <h2>使用技術與工具概覽</h2>
+                <p>此專案結合前後端多種技術，實現全面的網站詐騙檢測功能。以下是主要使用的技術、框架和工具的詳細說明。</p>
+                
+                <table class="tech-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">類別</th>
+                            <th style="width: 25%">技術/工具名稱</th>
+                            <th style="width: 50%">用途說明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 前端技術 -->
+                        <tr>
+                            <td rowspan="5" class="tech-category">前端技術</td>
+                            <td><i class="fab fa-html5 tech-icon"></i> HTML5</td>
+                            <td>構建網站的基本結構和頁面元素</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fab fa-css3-alt tech-icon"></i> CSS3</td>
+                            <td>網站樣式設計，實現現代化和響應式界面</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fab fa-js tech-icon"></i> JavaScript</td>
+                            <td>實現動態交互功能，處理API請求和響應</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-chart-pie tech-icon"></i> Chart.js</td>
+                            <td>生成詐騙風險百分比視覺化圓餅圖</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fab fa-font-awesome tech-icon"></i> Font Awesome</td>
+                            <td>提供直觀的圖標，增強用戶體驗</td>
+                        </tr>
+                        
+                        <!-- 後端技術 -->
+                        <tr>
+                            <td rowspan="6" class="tech-category">後端技術</td>
+                            <td><i class="fab fa-node-js tech-icon"></i> Node.js</td>
+                            <td>運行JavaScript服務器端代碼的環境</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fab fa-node-js tech-icon"></i> Express.js</td>
+                            <td>Node.js Web應用框架，用於構建API和處理HTTP請求</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-robot tech-icon"></i> Puppeteer</td>
+                            <td>實現網站自動化截圖和內容提取功能</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-exchange-alt tech-icon"></i> Axios</td>
+                            <td>發送HTTP請求，與第三方API交互</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-globe tech-icon"></i> CORS</td>
+                            <td>處理跨域資源共享，確保API安全訪問</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-shield-alt tech-icon"></i> dotenv</td>
+                            <td>管理環境變量，保護API密鑰等敏感信息</td>
+                        </tr>
+                        
+                        <!-- AI/ML技術 -->
+                        <tr>
+                            <td rowspan="2" class="tech-category">AI/ML技術</td>
+                            <td><i class="fas fa-brain tech-icon"></i> OpenAI API</td>
+                            <td>使用GPT模型分析網站內容，檢測潛在詐騙風險</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-search tech-icon"></i> 語義分析</td>
+                            <td>分析網站文本內容，識別詐騙指標和模式</td>
+                        </tr>
+                        
+                        <!-- 部署技術 -->
+                        <tr>
+                            <td rowspan="3" class="tech-category">部署技術</td>
+                            <td><i class="fab fa-docker tech-icon"></i> Docker</td>
+                            <td>容器化應用程序，確保一致的運行環境</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fab fa-github tech-icon"></i> GitHub</td>
+                            <td>代碼版本控制和協作開發</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-server tech-icon"></i> Render</td>
+                            <td>雲服務平台，用於部署和運行Web應用</td>
+                        </tr>
+                        
+                        <!-- 開發工具 -->
+                        <tr>
+                            <td rowspan="3" class="tech-category">開發工具</td>
+                            <td><i class="fab fa-npm tech-icon"></i> npm</td>
+                            <td>Node.js包管理器，管理項目依賴</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-code-branch tech-icon"></i> Git</td>
+                            <td>分散式版本控制系統，追蹤代碼變更</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-code tech-icon"></i> Visual Studio Code</td>
+                            <td>代碼編輯器，提供開發環境和擴展功能</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h2>系統架構</h2>
+                <p>此專案採用客戶端-服務器架構，使用RESTful API進行通信。前端透過API與後端交互，後端處理網站分析邏輯並返回結果。</p>
+                
+                <ul>
+                    <li><strong>前端</strong>：負責用戶交互界面和結果可視化展示</li>
+                    <li><strong>後端</strong>：處理網站截圖、內容提取和風險分析</li>
+                    <li><strong>AI服務</strong>：使用OpenAI API進行詐騙風險評估和指標識別</li>
+                </ul>
+                
+                <p>此專案中特別添加了對應用程式連結的檢測功能，能夠識別和警告與LINE等應用相關的潛在詐騙風險。</p>
+            </div>
+        </section>
+        
+        <!-- 頁腳 -->
+        <footer class="footer">
+            <p>網站詐騙檢測工具 &copy; 2025- 使用AI技術幫助用戶識別可能的詐騙網站</p>
+            <p><small>本工具僅供參考，請始終保持警覺，遵循網絡安全最佳實踐。</small></p>
+            <p class="creator-credit">@Made By Emma</p>
+        </footer>
+    </div>
+</body>
+</html> 
